@@ -1,0 +1,11 @@
+{
+    "output_path": "./",
+    "width": 1280,
+    "height": 720,
+    "brush_thickness": 5,
+    "brush_color": [
+        "#FF0000",
+        "#00FF00",
+        "#0000FF"
+    ]
+}

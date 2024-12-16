@@ -1,18 +1,28 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+
 from datetime import datetime
 
-# Initialize MediaPipe Hands
+import config_utils
+
+config = config_utils.read_config('./config.json')
+
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+hands = mp_hands.Hands(
+	max_num_hands=1, 
+	min_detection_confidence=0.5, 
+	min_tracking_confidence=0.5
+)
+
 mp_drawing = mp.solutions.drawing_utils
 
 # Create a blank canvas
-canvas = np.zeros((720, 1280, 3), dtype=np.uint8)
+canvas = config_utils.create_canvas(config)
 brush_color = (255, 0, 0)  # Default: Red
 brush_thickness = 5
 current_action = "Idle"  # Action tracking variable
+color_idx = 0
 
 # Function to recognize gestures
 def recognize_gesture(landmarks):
@@ -58,11 +68,12 @@ while cap.isOpened():
 				
 			elif fingers == [1, 1, 0, 0]:  # Two Fingers: Change brush color
 				current_action = "Changing Brush Color"
-				brush_color = tuple(np.random.randint(0, 255, 3).tolist())
+				color_idx = (color_idx + 1) % len(config['brush_color'])
+				brush_color = config['brush_color'][color_idx]
 				
 			elif sum(fingers) == 3:  # Fist: Clear the screen
 				current_action = "Clearing Screen"
-				canvas = np.zeros((720, 1280, 3), dtype=np.uint8)
+				canvas = config_utils.create_canvas(config)
 				
 			elif thumb and sum(fingers) == 4:  # Thumbs Up: Save drawing
 				current_action = "Saving Drawing"
@@ -86,7 +97,6 @@ while cap.isOpened():
 
 	# Show the output
 	cv2.imshow("Camera", output)
-	cv2.imshow("Canvas", canvas)
 	
 	if cv2.waitKey(1) & 0xFF == 27:  # Press 'ESC' to quit
 		break
