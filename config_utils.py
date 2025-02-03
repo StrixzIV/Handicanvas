@@ -9,15 +9,18 @@ def hex_to_rgb(color_hex: str) -> tuple[int, int, int]:
 
 def read_config(path: str) -> dict:
 
-    with open(path) as f:
-        result = json.load(f)
-    
-    result['output_path'] = os.path.abspath(result['output_path'])
-    result['brush_color'] = [hex_to_rgb(color) for color in result['brush_color']]
+	with open(path) as f:
+		result = json.load(f)
 
-    print(result)
+	result['output_path'] = os.path.abspath(result['output_path'])
+	result['brush_color'] = [hex_to_rgb(color) for color in result['brush_color']]
 
-    return result
+	os.system('clear')
+ 
+	if result['debug']:
+		print(f'Config values:\n{result}')
+
+	return result
 
 def create_canvas(config: dict) -> None:
     return np.zeros((config['height'], config['width'], 3), dtype=np.uint8)

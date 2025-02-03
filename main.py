@@ -19,6 +19,7 @@ mp_drawing = mp.solutions.drawing_utils
 
 # Create a blank canvas
 color_idx = 0
+is_debugging = config['debug']
 brush_color = config['brush_color'][0]
 brush_thickness = config['brush_thickness']
 current_action = "Idle"
@@ -39,24 +40,30 @@ def recognize_gesture(landmarks):
 # Main function
 cap = cv2.VideoCapture(0)
 drawing = False
+
 while cap.isOpened():
+	
 	ret, frame = cap.read()
+
 	if not ret:
 		break
 	
-	frame = cv2.flip(frame, 1)  # Flip for mirror effect
-	h, w, _ = frame.shape
+	frame = cv2.flip(frame, 1)
+	(h, w, _) = frame.shape
+ 
 	rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 	result = hands.process(rgb_frame)
 
 	if result.multi_hand_landmarks:
+
 		for hand_landmarks in result.multi_hand_landmarks:
 			mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 			landmarks = hand_landmarks.landmark
 			fingers, thumb = recognize_gesture(landmarks)
 			
-			print(sum(fingers))
-			print(f'Fingers: {fingers}, Thumb: {thumb}')
+			if is_debugging:
+				print(sum(fingers))
+				print(f'Fingers: {fingers}, Thumb: {thumb}')
 
 			if fingers == [1, 0, 0, 0] and not thumb:  # Pointing Finger: Draw
 				current_action = "Idle"
@@ -90,9 +97,7 @@ while cap.isOpened():
 
 	output = cv2.addWeighted(frame, 0.5, canvas, 0.5, 0)
 
-	cv2.putText(output, f"Action: {current_action}", (10, 50), 
-				cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
-
+	cv2.putText(output, f"Action: {current_action}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
 	cv2.imshow("Camera", output)
 	
 	if cv2.waitKey(1) & 0xFF == 27:
