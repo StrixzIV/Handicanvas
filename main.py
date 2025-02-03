@@ -18,11 +18,11 @@ hands = mp_hands.Hands(
 mp_drawing = mp.solutions.drawing_utils
 
 # Create a blank canvas
-canvas = config_utils.create_canvas(config)
-brush_color = (255, 0, 0)  # Default: Red
-brush_thickness = 5
-current_action = "Idle"  # Action tracking variable
 color_idx = 0
+brush_color = config['brush_color'][0]
+brush_thickness = config['brush_thickness']
+current_action = "Idle"
+canvas = config_utils.create_canvas(config)
 
 # Function to recognize gestures
 def recognize_gesture(landmarks):
@@ -84,21 +84,18 @@ while cap.isOpened():
 			else:
 				current_action = "Idle"
 
-			if drawing:  # Draw on the canvas
+			if drawing:
 				x, y = int(landmarks[8].x * w), int(landmarks[8].y * h)
 				cv2.circle(canvas, (x, y), brush_thickness, brush_color, -1)
-	
-	# Combine canvas with the frame
+
 	output = cv2.addWeighted(frame, 0.5, canvas, 0.5, 0)
 
-	# Add action text
 	cv2.putText(output, f"Action: {current_action}", (10, 50), 
 				cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
 
-	# Show the output
 	cv2.imshow("Camera", output)
 	
-	if cv2.waitKey(1) & 0xFF == 27:  # Press 'ESC' to quit
+	if cv2.waitKey(1) & 0xFF == 27:
 		break
 
 cap.release()
